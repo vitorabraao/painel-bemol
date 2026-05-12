@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chegadas — CD Manaus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+        --bemol-blue: #00A2E0;
+        --bemol-blue-dark: #0085B8;
+        --row-bg: #0E0E12;
+        --row-bg-alt: #16161D;
+        --row-border: #24242E;
+    }
+
+    /* Faz a página ocupar exatamente a altura da tela, sem scroll vertical */
+    html, body {
+        height: 100%;
+        overflow: hidden;
+    }
+
+    body {
+        background: var(--row-bg);
+        color: #fff;
+        font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+        display: flex;
+        flex-direction: column;
+        font-weight: 600;
+    }
+
+    /* === TOP BAR (FUNDO BRANCO) === */
+    .top-bar {
+        background: #fff;
+        padding: 16px 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 4px solid var(--bemol-blue);
+        gap: 24px;
+        flex-shrink: 0;
+    }
+
+    .top-left {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .logo-bemol-img {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .logo-bemol-img img {
+        height: 72px;
+        width: auto;
+        display: block;
+    }
+
+    .title-block {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .label-section {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 52px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        line-height: 1;
+        color: #002A75;
+        text-transform: uppercase;
+    }
+
+    .subtitle-section {
+        font-size: 17px;
+        font-weight: 700;
+        color: #002A75;
+        opacity: 0.7;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+
+    .clock-block { text-align: right; }
+
+    .clock {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 52px;
+        font-weight: 700;
+        line-height: 1;
+        color: #002A75;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 2px;
+    }
+
+    .date-text {
+        font-size: 13px;
+        color: #002A75;
+        opacity: 0.7;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        margin-top: 6px;
+        font-weight: 600;
+    }
+
+    .btn-config-top {
+        background: var(--bemol-blue);
+        color: #fff;
+        border: none;
+        padding: 8px 16px;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        cursor: pointer;
+        border-radius: 3px;
+        margin-left: 12px;
+    }
+    .btn-config-top:hover { background: #002A75; }
+
+    /* === KPI STRIP === */
+    .kpi-strip-wrapper {
+        background: #fff;
+        border-bottom: 1px solid #E5E7EB;
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    .kpi-strip {
+        background: #fff;
+        padding: 12px 32px;
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0;
+        transition: max-height 0.4s ease, padding 0.4s ease, opacity 0.3s ease;
+        max-height: 200px;
+        overflow: hidden;
+    }
+
+    .kpi-strip.collapsed {
+        max-height: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        opacity: 0;
+    }
+
+    .kpi {
+        padding: 4px 14px;
+        border-right: 1px solid #E5E7EB;
+        cursor: pointer;
+        transition: background 0.2s;
+        position: relative;
+        user-select: none;
+    }
+    .kpi:hover { background: #F3F6FA; }
+    .kpi:last-child { border-right: none; }
+    .kpi.active { background: #EAF4FB; }
+    .kpi.active::after {
+        content: '';
+        position: absolute;
+        bottom: 0; left: 0; right: 0;
+        height: 3px;
+        background: var(--bemol-blue);
+    }
+
+    .kpi-label {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 11px;
+        color: #6B7280;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        font-weight: 700;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .kpi-label .filter-icon { opacity: 0; transition: opacity 0.2s; font-size: 10px; }
+    .kpi:hover .kpi-label .filter-icon,
+    .kpi.active .kpi-label .filter-icon { opacity: 1; }
+
+    .kpi-value {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 36px;
+        font-weight: 800;
+        color: #002A75;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+    }
+    .kpi-value.blue   { color: var(--bemol-blue); }
+    .kpi-value.red    { color: #E30613; }
+    .kpi-value.green  { color: #00A86B; }
+    .kpi-value.yellow { color: #F59E0B; }
+    .kpi-value.orange { color: #EA580C; }
+    .kpi-value.purple { color: #8B5CF6; }
+
+    .kpi-extra {
+        font-size: 10px;
+        color: #6B7280;
+        margin-top: 2px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .kpi-toggle {
+        position: absolute;
+        top: 8px; right: 16px;
+        background: #F3F6FA;
+        border: 1px solid #E5E7EB;
+        color: #002A75;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 12px; font-weight: 700;
+        letter-spacing: 1px; text-transform: uppercase;
+        padding: 4px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex; align-items: center; gap: 6px;
+        z-index: 10;
+        transition: background 0.2s;
+    }
+    .kpi-toggle:hover { background: var(--bemol-blue); color: #fff; border-color: var(--bemol-blue); }
+    .kpi-toggle .arrow { transition: transform 0.3s ease; font-size: 14px; line-height: 1; }
+    .kpi-toggle.collapsed .arrow { transform: rotate(180deg); }
+
+    .filter-status {
+        background: #F3F6FA;
+        padding: 6px 32px;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 12px;
+        color: #002A75;
+        letter-spacing: 1px; text-transform: uppercase; font-weight: 600;
+        border-bottom: 1px solid #E5E7EB;
+        display: none; align-items: center; gap: 12px;
+        flex-shrink: 0;
+    }
+    .filter-status.visible { display: flex; }
+    .filter-status .clear-btn {
+        background: var(--bemol-blue); color: #fff; border: none;
+        padding: 3px 10px; border-radius: 3px;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 11px; letter-spacing: 1px; font-weight: 700;
+        text-transform: uppercase; cursor: pointer;
+    }
+    .filter-status .clear-btn:hover { background: #002A75; }
+
+    /* === COLUMN HEADERS === */
+    .col-headers {
+        background: #fff;
+        color: var(--bemol-blue);
+        padding: 8px 32px;
+        display: grid;
+        grid-template-columns: 90px 80px 70px 1fr 120px 150px 140px 130px 100px 80px 90px 180px;
+        gap: 14px;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 18px; font-weight: 800;
+        letter-spacing: 1px; text-transform: uppercase;
+        align-items: center;
+        border-bottom: 2px solid #E5E7EB;
+        flex-shrink: 0;
+    }
+
+    /* === ROWS — crescem para preencher o espaço restante === */
+    .rows-container {
+        background: var(--row-bg);
+        flex: 1;                   /* ocupa todo espaço vertical restante */
+        overflow-y: auto;          /* scroll só aqui, se precisar */
+        display: flex;
+        flex-direction: column;
+    }
+
+    .row {
+        display: grid;
+        grid-template-columns: 90px 80px 70px 1fr 120px 150px 140px 130px 100px 80px 90px 180px;
+        gap: 14px;
+        padding: 0 32px;
+        align-items: center;
+        border-bottom: 1px solid var(--row-border);
+        font-size: 26px;
+        font-weight: 700;
+        line-height: 1;
+        transition: background 0.3s;
+        flex: 1;                   /* cada linha divide o espaço igualmente */
+        min-height: 52px;
+    }
+
+    .row:nth-child(even) { background: var(--row-bg-alt); }
+
+    .row.flash { animation: flash 1.5s ease-out; }
+    .row.atrasado-row { border-left: 4px solid #FF1744; }
+
+    @keyframes flash {
+        0%   { background: rgba(0, 61, 165, 0.5); }
+        100% { background: transparent; }
+    }
+
+    /* === COLUNAS === */
+    .col-time {
+        font-variant-numeric: tabular-nums;
+        color: #fff;
+        letter-spacing: 1px;
+    }
+
+    /* Tempo de percurso — badge colorido */
+    .tempo-badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 3px;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 20px;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 1px;
+        line-height: 1;
+    }
+    .tempo-ok      { background: #00A86B; color: #fff; }
+    .tempo-late    { background: #E30613; color: #fff; }
+    .tempo-running { background: #F59E0B; color: #000; }
+    .tempo-empty   { color: rgba(255,255,255,0.3); background: transparent; font-size: 22px; }
+
+    .col-destino {
+        color: #fff;
+        text-transform: uppercase;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: flex;
+        align-items: center;
+    }
+    .col-destino .num {
+        color: #fff;
+        background: var(--bemol-blue);
+        padding: 4px 10px;
+        margin-right: 12px;
+        border-radius: 3px;
+        font-size: 22px;
+        min-width: 54px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    .col-transp { display: flex; align-items: center; }
+    .transp-logo {
+        padding: 5px 12px;
+        font-family: 'Barlow', sans-serif;
+        font-size: 18px; font-weight: 800;
+        letter-spacing: 1px; text-transform: uppercase;
+        border-radius: 2px; white-space: nowrap;
+    }
+    .transp-bemol   { background: var(--bemol-blue); color: #fff; }
+    .transp-abraao  { background: #E30613; color: #fff; }
+    .transp-aldo    { background: #FFC107; color: #000; }
+    .transp-default { background: #fff; color: #000; }
+
+    .col-placa {
+        font-variant-numeric: tabular-nums;
+        color: #fff; letter-spacing: 1px;
+    }
+
+    .col-motorista {
+        color: rgba(255,255,255,0.85);
+        font-size: 20px; font-weight: 600;
+        text-transform: uppercase;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .col-conferente {
+        color: rgba(255,255,255,0.65);
+        font-size: 18px; font-weight: 600;
+        text-transform: uppercase;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .col-paletes { font-size: 22px; color: #fff; text-align: center; }
+    .col-dt { font-size: 17px; color: rgba(255,255,255,0.7); font-variant-numeric: tabular-nums; }
+
+    .col-doca {
+        color: #fff;
+        font-variant-numeric: tabular-nums;
+        text-align: center;
+        background: rgba(255,255,255,0.08);
+        padding: 4px 8px;
+        border-radius: 3px;
+        display: inline-block;
+        min-width: 64px;
+        font-size: 20px;
+    }
+
+    /* === STATUS === */
+    .status {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 24px; font-weight: 800;
+        text-transform: uppercase; letter-spacing: 1px;
+        white-space: nowrap; line-height: 1;
+    }
+    .status-sub {
+        font-size: 12px; font-weight: 600;
+        text-transform: uppercase; letter-spacing: 1px;
+        opacity: 0.75; margin-top: 3px;
+    }
+
+    .status-chegou            { color: #00E676; }
+    .status-finalizada        { color: #00E676; }
+    .status-em-rota           { color: #00A2E0; animation: blink-slow 1.5s infinite; }
+    .status-retornando        { color: #8B5CF6; animation: blink-slow 1.5s infinite; }
+    .status-chegou-loja       { color: #00E676; }
+    .status-aguardando        { color: #F59E0B; animation: blink-slow 1.8s infinite; }
+    .status-carregamento      { color: #EA580C; }
+    .status-atrasado          { color: #FF1744; animation: blink-fast 0.7s infinite; }
+    .status-cancelado         { color: #FF1744; }
+    .status-confirmado        { color: #F59E0B; }
+    .status-embarque-proximo  { color: #F59E0B; animation: blink-slow 1.5s infinite; }
+    .status-embarque-imediato { color: #F59E0B; animation: blink-fast 0.7s infinite; }
+
+    @keyframes blink-slow {
+        0%, 60%, 100% { opacity: 1; }
+        80% { opacity: 0.4; }
+    }
+    @keyframes blink-fast {
+        0%, 50%, 100% { opacity: 1; }
+        25%, 75% { opacity: 0.3; }
+    }
+
+    /* === FOOTER === */
+    .footer-strip {
+        background: var(--bemol-blue);
+        color: #fff;
+        padding: 10px 32px;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 17px; font-weight: 700;
+        letter-spacing: 2px; text-transform: uppercase;
+        display: flex; justify-content: space-between; align-items: center;
+        border-top: 4px solid #fff;
+        flex-shrink: 0;
+    }
+    .footer-strip .live { display: flex; align-items: center; gap: 10px; }
+    .live-dot-blk {
+        width: 12px; height: 12px;
+        background: #FFC107; border-radius: 50%;
+        animation: blink-fast 1s infinite;
+    }
+    .alerta-footer { color: #FFC107; font-weight: 800; }
+
+    /* === MODAL CONFIG === */
+    .modal-overlay {
+        display: none;
+        position: fixed; inset: 0;
+        background: rgba(0,0,0,0.75);
+        z-index: 100;
+        align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+        background: #fff;
+        padding: 28px 32px;
+        width: 520px; max-width: 95vw;
+        border-radius: 6px;
+        border-top: 4px solid var(--bemol-blue);
+    }
+    .modal h2 {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 26px; letter-spacing: 2px;
+        margin-bottom: 18px;
+        color: #002A75; text-transform: uppercase;
+    }
+    .modal label {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 12px; color: #6B7280;
+        letter-spacing: 1.5px; text-transform: uppercase;
+        font-weight: 700; display: block;
+        margin-bottom: 5px; margin-top: 14px;
+    }
+    .modal input, .modal select {
+        width: 100%; background: #F3F6FA;
+        border: 1px solid #E5E7EB; color: #111;
+        padding: 9px 12px; font-size: 14px;
+        border-radius: 3px; outline: none;
+        font-family: 'Barlow', sans-serif;
+    }
+    .modal input:focus, .modal select:focus { border-color: var(--bemol-blue); }
+    .modal-footer { display: flex; gap: 10px; margin-top: 22px; justify-content: flex-end; }
+    .btn-salvar {
+        background: var(--bemol-blue); border: none; color: #fff;
+        padding: 9px 22px;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 15px; font-weight: 700;
+        letter-spacing: 2px; text-transform: uppercase;
+        cursor: pointer; border-radius: 3px;
+    }
+    .btn-cancelar {
+        background: transparent; border: 1px solid #E5E7EB; color: #6B7280;
+        padding: 9px 22px;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 15px; letter-spacing: 2px;
+        text-transform: uppercase; cursor: pointer; border-radius: 3px;
+    }
+
+    /* TOAST */
+    .toast {
+        position: fixed; bottom: 70px; right: 24px;
+        background: #FF1744; color: #fff;
+        padding: 14px 20px;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 16px; font-weight: 700;
+        letter-spacing: 1px; text-transform: uppercase;
+        border-radius: 3px; z-index: 200;
+        animation: slideIn 0.3s ease;
+        max-width: 380px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+    }
+    .toast.hide { animation: slideOut 0.3s ease forwards; }
+    @keyframes slideIn { from { transform: translateX(120%); opacity:0; } to { transform: translateX(0); opacity:1; } }
+    @keyframes slideOut { to { transform: translateX(120%); opacity:0; } }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+    <div class="top-left">
+        <div class="logo-bemol-img">
+            <!-- Logo Bemol SVG inline — sempre vai aparecer, sem depender de URL externa -->
+            <svg width="90" height="56" viewBox="0 0 120 74" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="120" height="74" rx="10" fill="#00A2E0"/>
+                <text x="60" y="52" text-anchor="middle"
+                      font-family="'Barlow Condensed', Arial Narrow, sans-serif"
+                      font-weight="800" font-size="42" fill="#fff" letter-spacing="1">
+                    bemol
+                </text>
+            </svg>
+        </div>
+        <div class="title-block">
+            <div class="label-section">Registro de Rotas</div>
+            <div class="subtitle-section">CD Manaus · 104 Bemol</div>
+        </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:16px;">
+        <div class="clock-block">
+            <div class="clock" id="clock">--:--</div>
+            <div class="date-text" id="date">--</div>
+        </div>
+        <button class="btn-config-top" onclick="document.getElementById('modal-cfg').classList.add('open')">⚙ Config</button>
+    </div>
+</div>
+
+<!-- KPI STRIP -->
+<div class="kpi-strip-wrapper">
+    <button class="kpi-toggle" id="kpi-toggle" title="Recolher/expandir">
+        <span class="arrow">⌃</span>
+        <span class="toggle-text">Recolher</span>
+    </button>
+    <div class="kpi-strip" id="kpi-strip">
+        <div class="kpi" data-filter="all">
+            <div class="kpi-label">Total hoje <span class="filter-icon">◉</span></div>
+            <div class="kpi-value" id="kpi-total">0</div>
+            <div class="kpi-extra">rotas registradas</div>
+        </div>
+        <div class="kpi" data-filter="em-carregamento">
+            <div class="kpi-label">Em carregamento <span class="filter-icon">◉</span></div>
+            <div class="kpi-value orange" id="kpi-car">0</div>
+            <div class="kpi-extra">aguardando dt</div>
+        </div>
+        <div class="kpi" data-filter="aguardando-retirada">
+            <div class="kpi-label">Aguard. retirada <span class="filter-icon">◉</span></div>
+            <div class="kpi-value yellow" id="kpi-ag">0</div>
+            <div class="kpi-extra">prontas pra sair</div>
+        </div>
+        <div class="kpi" data-filter="em-rota">
+            <div class="kpi-label">Em rota <span class="filter-icon">◉</span></div>
+            <div class="kpi-value blue" id="kpi-er">0</div>
+            <div class="kpi-extra">a caminho da loja</div>
+        </div>
+        <div class="kpi" data-filter="chegou-loja">
+            <div class="kpi-label">Chegou na loja <span class="filter-icon">◉</span></div>
+            <div class="kpi-value green" id="kpi-cl">0</div>
+            <div class="kpi-extra">descarregando</div>
+        </div>
+        <div class="kpi" data-filter="retornando">
+            <div class="kpi-label">Retornando <span class="filter-icon">◉</span></div>
+            <div class="kpi-value purple" id="kpi-ret">0</div>
+            <div class="kpi-extra">voltando ao cd</div>
+        </div>
+        <div class="kpi" data-filter="atrasado">
+            <div class="kpi-label">Atrasados <span class="filter-icon">◉</span></div>
+            <div class="kpi-value red" id="kpi-atr">0</div>
+            <div class="kpi-extra">requer atenção</div>
+        </div>
+    </div>
+</div>
+
+<div class="filter-status" id="filter-status">
+    <span>Filtros ativos:</span>
+    <span id="filter-list"></span>
+    <button class="clear-btn" id="clear-filters">Limpar</button>
+</div>
+
+<!-- COLUMN HEADERS -->
+<div class="col-headers">
+    <div>Saída CD</div>
+    <div>Chegada</div>
+    <div>Tempo</div>
+    <div>Destino · Itinerário</div>
+    <div>Conferente</div>
+    <div>Lacre Tras.</div>
+    <div>Placa</div>
+    <div>Transportadora</div>
+    <div>Motorista</div>
+    <div>Paletes</div>
+    <div>Doca</div>
+    <div>Status</div>
+</div>
+
+<!-- ROWS -->
+<div class="rows-container" id="rows-container"></div>
+
+<!-- FOOTER -->
+<div class="footer-strip">
+    <div class="live">
+        <span class="live-dot-blk"></span>
+        <span>AO VIVO</span>
+    </div>
+    <div id="alerta-count" class="alerta-footer"></div>
+    <div>Última sincronização: <span id="last-sync">agora</span></div>
+    <div>SHAREPOINT · POWER AUTOMATE</div>
+</div>
+
+<!-- MODAL CONFIG -->
+<div class="modal-overlay" id="modal-cfg">
+    <div class="modal">
+        <h2>⚙ Configurações</h2>
+        <label>URL do SharePoint (site)</label>
+        <input type="text" id="cfg-url" placeholder="https://bemol.sharepoint.com/sites/CD">
+        <label>Nome da Lista</label>
+        <input type="text" id="cfg-lista" value="RegistroAbastecimento">
+        <label>E-mail da Operação (alertas)</label>
+        <input type="email" id="cfg-email-op" placeholder="operacao@bemol.com.br">
+        <label>Tempo limite padrão por etapa (minutos)</label>
+        <input type="number" id="cfg-tempo" value="60" min="10" max="480">
+        <label>Intervalo de atualização (segundos)</label>
+        <input type="number" id="cfg-intervalo" value="30" min="10" max="300">
+        <div class="modal-footer">
+            <button class="btn-cancelar" onclick="document.getElementById('modal-cfg').classList.remove('open')">Cancelar</button>
+            <button class="btn-salvar" onclick="salvarConfig()">Salvar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════
+let CONFIG = {
+    sharepointUrl: '',
+    listaNome: 'RegistroAbastecimento',
+    emailOperacao: '',
+    tempoLimiteMins: 60,
+    intervaloSecs: 30,
+};
+try {
+    const saved = JSON.parse(localStorage.getItem('bemol-cfg') || '{}');
+    CONFIG = { ...CONFIG, ...saved };
+    document.getElementById('cfg-url').value       = CONFIG.sharepointUrl;
+    document.getElementById('cfg-lista').value     = CONFIG.listaNome;
+    document.getElementById('cfg-email-op').value  = CONFIG.emailOperacao;
+    document.getElementById('cfg-tempo').value     = CONFIG.tempoLimiteMins;
+    document.getElementById('cfg-intervalo').value = CONFIG.intervaloSecs;
+} catch(e) {}
+
+function salvarConfig() {
+    CONFIG.sharepointUrl   = document.getElementById('cfg-url').value.trim();
+    CONFIG.listaNome       = document.getElementById('cfg-lista').value.trim();
+    CONFIG.emailOperacao   = document.getElementById('cfg-email-op').value.trim();
+    CONFIG.tempoLimiteMins = parseInt(document.getElementById('cfg-tempo').value) || 60;
+    CONFIG.intervaloSecs   = parseInt(document.getElementById('cfg-intervalo').value) || 30;
+    localStorage.setItem('bemol-cfg', JSON.stringify(CONFIG));
+    document.getElementById('modal-cfg').classList.remove('open');
+    iniciarAtualizacao();
+}
+
+// ═══════════════════════════════════════════════════════
+// MOCK DATA
+// ═══════════════════════════════════════════════════════
+const MOCK = [
+    { Title:'106 - Amazonas Shopping', Itinerario:'106', Destino:'Amazonas Shopping', Transportadora:'Bemol',  Dt:'21279',  Placa:'120',  Motorista:'Vitor Sousa',    Conferente:'Marjorie Shigaki', Lacre_traseiro:'1234', Paletes:12, Doca:'063', SaidaCD:'2026-05-11T13:35:00', ChegadaLoja:'2026-05-11T13:36:00', SaidaLoja:'2026-05-11T15:00:00', ChegadaCD:'2026-05-11T16:10:00', email_da_loja:'almoxarifadoshopping@bemol.com.br', tempo_de_viagem:60 },
+    { Title:'550 - Iranduba',          Itinerario:'550', Destino:'Iranduba',          Transportadora:'Bemol',  Dt:'2127894', Placa:'101',  Motorista:'Carlos Lima',    Conferente:'Pedro Henrique',   Lacre_traseiro:'12324',Paletes:12, Doca:'063', SaidaCD:'2026-05-11T14:38:00', ChegadaLoja:'',                    SaidaLoja:'',                    ChegadaCD:'',                    email_da_loja:'iranduba@bemol.com.br',              tempo_de_viagem:45 },
+    { Title:'105 - Educandos',         Itinerario:'105', Destino:'Educandos',         Transportadora:'Bemol',  Dt:'214552',  Placa:'123',  Motorista:'Vitor Sousa',    Conferente:'Marjorie Shigaki', Lacre_traseiro:'1245', Paletes:18, Doca:'063', SaidaCD:'2026-05-11T17:28:00', ChegadaLoja:'2026-05-11T17:31:00', SaidaLoja:'',                    ChegadaCD:'',                    email_da_loja:'educandos@bemol.com.br',             tempo_de_viagem:30 },
+    { Title:'103 - Avenida Djalma',    Itinerario:'103', Destino:'Avenida Djalma',    Transportadora:'Abraão', Dt:'123',     Placa:'1234', Motorista:'Vitor Sousa',    Conferente:'João Silva',       Lacre_traseiro:'5125', Paletes:13, Doca:'067', SaidaCD:'2026-05-11T17:42:00', ChegadaLoja:'2026-05-11T17:43:00', SaidaLoja:'',                    ChegadaCD:'',                    email_da_loja:'djalma@bemol.com.br',                tempo_de_viagem:40 },
+    { Title:'116 - Studio 5',          Itinerario:'116', Destino:'Studio 5',          Transportadora:'Abraão', Dt:'212786',  Placa:'033',  Motorista:'Vitor Sousa',    Conferente:'Pedro Henrique',   Lacre_traseiro:'9900', Paletes:12, Doca:'060', SaidaCD:'2026-05-11T17:59:00', ChegadaLoja:'2026-05-11T18:00:00', SaidaLoja:'',                    ChegadaCD:'',                    email_da_loja:'studio5@bemol.com.br',               tempo_de_viagem:35 },
+    { Title:'115 - Cidade Nova',       Itinerario:'115', Destino:'Cidade Nova',       Transportadora:'Abraão', Dt:'212790',  Placa:'157',  Motorista:'Vitor Sousa',    Conferente:'Marjorie Shigaki', Lacre_traseiro:'3344', Paletes:10, Doca:'060', SaidaCD:'2026-05-11T18:55:00', ChegadaLoja:'2026-05-11T18:59:00', SaidaLoja:'',                    ChegadaCD:'',                    email_da_loja:'cidadenova@bemol.com.br',            tempo_de_viagem:50 },
+    { Title:'108 - Ponta Negra',       Itinerario:'108', Destino:'Ponta Negra',       Transportadora:'Bemol',  Dt:'218900',  Placa:'9090', Motorista:'João Almeida',   Conferente:'João Silva',       Lacre_traseiro:'7712', Paletes:14, Doca:'065', SaidaCD:'2026-05-11T20:10:00', ChegadaLoja:'',                    SaidaLoja:'',                    ChegadaCD:'',                    email_da_loja:'pontanegra@bemol.com.br',            tempo_de_viagem:55 },
+    { Title:'109 - Grande Circular',   Itinerario:'109', Destino:'Grande Circular',   Transportadora:'Aldo',   Dt:'21455',   Placa:'7B43', Motorista:'Aldo Silva',     Conferente:'Pedro Henrique',   Lacre_traseiro:'2201', Paletes:12, Doca:'064', SaidaCD:'2026-05-11T20:55:00', ChegadaLoja:'',                    SaidaLoja:'',                    ChegadaCD:'',                    email_da_loja:'circular@bemol.com.br',              tempo_de_viagem:60 },
+    { Title:'107 - Centro',            Itinerario:'107', Destino:'Centro',            Transportadora:'Bemol',  Dt:'218950',  Placa:'4422', Motorista:'Marcos Alves',   Conferente:'Marjorie Shigaki', Lacre_traseiro:'8801', Paletes:16, Doca:'062', SaidaCD:'2026-05-11T22:28:00', ChegadaLoja:'',                    SaidaLoja:'',                    ChegadaCD:'',                    email_da_loja:'centro@bemol.com.br',                tempo_de_viagem:25 },
+    { Title:'111 - São José',          Itinerario:'111', Destino:'São José',          Transportadora:'Bemol',  Dt:'17238',   Placa:'8855', Motorista:'Pedro Henrique', Conferente:'João Silva',       Lacre_traseiro:'4411', Paletes:11, Doca:'066', SaidaCD:'2026-05-11T22:55:00', ChegadaLoja:'',                    SaidaLoja:'',                    ChegadaCD:'',                    email_da_loja:'saojose@bemol.com.br',               tempo_de_viagem:30 },
+    { Title:'112 - Adrianópolis',      Itinerario:'112', Destino:'Adrianópolis',      Transportadora:'Bemol',  Dt:'218960',  Placa:'1010', Motorista:'Marcos Alves',   Conferente:'Pedro Henrique',   Lacre_traseiro:'6688', Paletes:18, Doca:'062', SaidaCD:'2026-05-11T23:25:00', ChegadaLoja:'',                    SaidaLoja:'',                    ChegadaCD:'',                    email_da_loja:'adrianopolis@bemol.com.br',          tempo_de_viagem:35 },
+];
+
+const emailsEnviados = new Set();
+let dadosGlobais = [...MOCK];
+
+// ═══════════════════════════════════════════════════════
+// STATUS AUTOMÁTICO
+// ═══════════════════════════════════════════════════════
+function calcStatus(item) {
+    const limite  = parseInt(item.tempo_de_viagem) || CONFIG.tempoLimiteMins;
+    const agora   = new Date();
+    const saidaCD     = item.SaidaCD     ? new Date(item.SaidaCD)     : null;
+    const chegadaLoja = item.ChegadaLoja ? new Date(item.ChegadaLoja) : null;
+    const saidaLoja   = item.SaidaLoja   ? new Date(item.SaidaLoja)   : null;
+    const chegadaCD   = item.ChegadaCD   ? new Date(item.ChegadaCD)   : null;
+
+    if (chegadaCD)
+        return { label:'ROTA FINALIZADA', filtro:'finalizada', cls:'status-finalizada', atrasado:false, mins:null };
+
+    if (saidaLoja && !chegadaCD) {
+        const mins = Math.floor((agora - saidaLoja) / 60000);
+        const atrasado = mins > limite;
+        return { label: atrasado ? 'ATRASADO' : 'RETORNANDO AO CD', filtro: atrasado ? 'atrasado' : 'retornando', cls: atrasado ? 'status-atrasado' : 'status-retornando', atrasado, mins };
+    }
+
+    if (chegadaLoja && !saidaLoja) {
+        const mins = Math.floor((agora - chegadaLoja) / 60000);
+        const atrasado = mins > limite;
+        return { label: atrasado ? 'ATRASADO' : 'CHEGOU NA LOJA', filtro: atrasado ? 'atrasado' : 'chegou-loja', cls: atrasado ? 'status-atrasado' : 'status-chegou-loja', atrasado, mins };
+    }
+
+    if (saidaCD && !chegadaLoja) {
+        const mins = Math.floor((agora - saidaCD) / 60000);
+        const atrasado = mins > limite;
+        return { label: atrasado ? 'ATRASADO' : 'EM ROTA', filtro: atrasado ? 'atrasado' : 'em-rota', cls: atrasado ? 'status-atrasado' : 'status-em-rota', atrasado, mins };
+    }
+
+    if (item.Dt && !saidaCD)
+        return { label:'AGUARDANDO RETIRADA', filtro:'aguardando-retirada', cls:'status-aguardando', atrasado:false, mins:null };
+
+    return { label:'EM CARREGAMENTO', filtro:'em-carregamento', cls:'status-carregamento', atrasado:false, mins:null };
+}
+
+// ═══════════════════════════════════════════════════════
+// TEMPO DE PERCURSO (SaidaCD → ChegadaCD ou agora)
+// ═══════════════════════════════════════════════════════
+function calcTempo(item) {
+    const saidaCD   = item.SaidaCD   ? new Date(item.SaidaCD)   : null;
+    const chegadaCD = item.ChegadaCD ? new Date(item.ChegadaCD) : null;
+    if (!saidaCD) return { texto: '–', cls: 'tempo-empty', title: '' };
+
+    const fim      = chegadaCD || new Date();
+    const totalMin = Math.floor((fim - saidaCD) / 60000);
+    const limite   = (parseInt(item.tempo_de_viagem) || CONFIG.tempoLimiteMins) * 2 + 30;
+
+    let texto;
+    const horas = Math.floor(totalMin / 60);
+    const mins  = totalMin % 60;
+    if (horas > 0) texto = `${horas}h${String(mins).padStart(2,'0')}`;
+    else           texto = `${mins}min`;
+
+    if (chegadaCD) return { texto, cls: 'tempo-ok',   title: 'rota concluída' };
+    if (totalMin > limite) return { texto, cls: 'tempo-late',    title: 'acima do limite' };
+    return { texto, cls: 'tempo-running', title: 'em andamento' };
+}
+
+// ═══════════════════════════════════════════════════════
+// ALERTA
+// ═══════════════════════════════════════════════════════
+function dispararAlerta(item, status, mins) {
+    const key = item.Title + '-' + status;
+    if (emailsEnviados.has(key)) return;
+    emailsEnviados.add(key);
+    console.warn(`[ALERTA] ${item.Itinerario} ${item.Destino} - ${mins} min`);
+    toast(`⚠ ALERTA: Rota ${item.Itinerario} – ${item.Destino} (${mins} min)`, 5000);
+    // Webhook Power Automate (descomente e preencha quando configurar):
+    // fetch('SEU_WEBHOOK_POWER_AUTOMATE', { method:'POST', headers:{'Content-Type':'application/json'},
+    //   body: JSON.stringify({ destinatarios:[item.email_da_loja, CONFIG.emailOperacao].filter(Boolean),
+    //     assunto:`ATRASO - Rota ${item.Itinerario} ${item.Destino}`,
+    //     corpo:`Motorista: ${item.Motorista} | Placa: ${item.Placa} | DT: ${item.Dt} | ${mins} min na etapa` })
+    // });
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════
+function transpClass(t) {
+    if (!t) return 'transp-default';
+    const k = t.toLowerCase();
+    if (k.includes('bemol')) return 'transp-bemol';
+    if (k.includes('abra'))  return 'transp-abraao';
+    if (k.includes('aldo'))  return 'transp-aldo';
+    return 'transp-default';
+}
+
+function fmtHora(iso) {
+    if (!iso) return '–';
+    const d = new Date(iso);
+    return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+
+function renderRows() {
+    const container = document.getElementById('rows-container');
+    container.innerHTML = dadosGlobais.map(item => {
+        const s  = calcStatus(item);
+        const tp = calcTempo(item);
+        if (s.atrasado) dispararAlerta(item, s.label, s.mins);
+
+        const subText = s.mins !== null
+            ? `<div class="status-sub ${s.atrasado ? 'status-atrasado' : ''}">${s.atrasado ? '⚠ ' : ''}${s.mins} min na etapa</div>`
+            : '';
+
+        // Chegada = ChegadaLoja se existir, senão –
+        const chegadaDisplay = fmtHora(item.ChegadaLoja);
+
+        return `
+        <div class="row ${s.atrasado ? 'atrasado-row' : ''}" data-status="${s.filtro}">
+            <div class="col-time">${fmtHora(item.SaidaCD)}</div>
+            <div class="col-time">${chegadaDisplay}</div>
+            <div><span class="tempo-badge ${tp.cls}" title="${tp.title}">${tp.texto}</span></div>
+            <div class="col-destino"><span class="num">${item.Itinerario}</span>${item.Destino}</div>
+            <div class="col-conferente">${item.Conferente || '—'}</div>
+            <div class="col-placa">${item.Lacre_traseiro || '—'}</div>
+            <div class="col-placa">${item.Placa || '—'}</div>
+            <div class="col-transp"><span class="transp-logo ${transpClass(item.Transportadora)}">${item.Transportadora || '—'}</span></div>
+            <div class="col-motorista">${item.Motorista || '—'}</div>
+            <div class="col-paletes">${item.Paletes || '—'}</div>
+            <div><span class="col-doca">${item.Doca || '—'}</span></div>
+            <div>
+                <div class="status ${s.cls}">${s.label}</div>
+                ${subText}
+            </div>
+        </div>`;
+    }).join('');
+
+    aplicarFiltros();
+    atualizarKPIs();
+}
+
+function atualizarKPIs() {
+    const c = { total:0, car:0, ag:0, er:0, cl:0, ret:0, atr:0 };
+    dadosGlobais.forEach(d => {
+        c.total++;
+        const s = calcStatus(d);
+        if (s.filtro === 'em-carregamento')     c.car++;
+        if (s.filtro === 'aguardando-retirada') c.ag++;
+        if (s.filtro === 'em-rota')             c.er++;
+        if (s.filtro === 'chegou-loja')         c.cl++;
+        if (s.filtro === 'retornando')          c.ret++;
+        if (s.filtro === 'atrasado')            c.atr++;
+    });
+    document.getElementById('kpi-total').textContent = c.total;
+    document.getElementById('kpi-car').textContent   = c.car;
+    document.getElementById('kpi-ag').textContent    = c.ag;
+    document.getElementById('kpi-er').textContent    = c.er;
+    document.getElementById('kpi-cl').textContent    = c.cl;
+    document.getElementById('kpi-ret').textContent   = c.ret;
+    document.getElementById('kpi-atr').textContent   = c.atr;
+
+    const el = document.getElementById('alerta-count');
+    el.textContent = c.atr > 0 ? `⚠ ${c.atr} ROTA${c.atr>1?'S':''} ATRASADA${c.atr>1?'S':''}` : '';
+}
+
+// ═══════════════════════════════════════════════════════
+// RELÓGIO
+// ═══════════════════════════════════════════════════════
+function atualizarRelogio() {
+    const agora = new Date();
+    const h = String(agora.getHours()).padStart(2,'0');
+    const m = String(agora.getMinutes()).padStart(2,'0');
+    document.getElementById('clock').textContent = `${h}:${m}`;
+    const dias  = ['DOMINGO','SEGUNDA','TERÇA','QUARTA','QUINTA','SEXTA','SÁBADO'];
+    const meses = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+    document.getElementById('date').textContent =
+        `${dias[agora.getDay()]} ${String(agora.getDate()).padStart(2,'0')} ${meses[agora.getMonth()]} ${agora.getFullYear()}`;
+}
+
+let segundosUpdate = 0;
+function atualizarSync() {
+    segundosUpdate++;
+    const el = document.getElementById('last-sync');
+    el.textContent = segundosUpdate < 5 ? 'agora' : `há ${segundosUpdate}s`;
+}
+
+// ═══════════════════════════════════════════════════════
+// KPI INTERATIVO
+// ═══════════════════════════════════════════════════════
+const kpiToggle = document.getElementById('kpi-toggle');
+const kpiStrip  = document.getElementById('kpi-strip');
+const toggleText = kpiToggle.querySelector('.toggle-text');
+
+kpiToggle.addEventListener('click', () => {
+    const isCollapsed = kpiStrip.classList.toggle('collapsed');
+    kpiToggle.classList.toggle('collapsed');
+    toggleText.textContent = isCollapsed ? 'Expandir' : 'Recolher';
+});
+
+const filtrosAtivos = new Set();
+const filterStatus  = document.getElementById('filter-status');
+const filterList    = document.getElementById('filter-list');
+
+document.querySelectorAll('.kpi').forEach(kpi => {
+    kpi.addEventListener('click', () => {
+        const filtro = kpi.getAttribute('data-filter');
+        if (filtro === 'all') {
+            filtrosAtivos.clear();
+            document.querySelectorAll('.kpi').forEach(k => k.classList.remove('active'));
+            aplicarFiltros();
+            return;
+        }
+        if (filtrosAtivos.has(filtro)) { filtrosAtivos.delete(filtro); kpi.classList.remove('active'); }
+        else                           { filtrosAtivos.add(filtro);    kpi.classList.add('active');    }
+        aplicarFiltros();
+    });
+});
+
+document.getElementById('clear-filters').addEventListener('click', () => {
+    filtrosAtivos.clear();
+    document.querySelectorAll('.kpi').forEach(k => k.classList.remove('active'));
+    aplicarFiltros();
+});
+
+function aplicarFiltros() {
+    const linhas = document.querySelectorAll('.row');
+    const labelsMap = {
+        'em-carregamento':'Em Carregamento', 'aguardando-retirada':'Aguardando Retirada',
+        'em-rota':'Em Rota', 'chegou-loja':'Chegou na Loja',
+        'retornando':'Retornando', 'atrasado':'Atrasados', 'finalizada':'Finalizadas'
+    };
+    if (filtrosAtivos.size === 0) {
+        linhas.forEach(l => l.style.display = '');
+        filterStatus.classList.remove('visible');
+    } else {
+        linhas.forEach(l => { l.style.display = filtrosAtivos.has(l.dataset.status) ? '' : 'none'; });
+        filterList.textContent = [...filtrosAtivos].map(f => labelsMap[f]||f).join(' · ');
+        filterStatus.classList.add('visible');
+    }
+}
+
+// ═══════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════
+function toast(msg, dur = 3000) {
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => { el.classList.add('hide'); setTimeout(() => el.remove(), 400); }, dur);
+}
+
+// ═══════════════════════════════════════════════════════
+// SHAREPOINT
+// ═══════════════════════════════════════════════════════
+async function carregarSharePoint() {
+    // Link do OneDrive com download direto
+    const ONEDRIVE_URL = 'https://bemol-my.sharepoint.com/:u:/g/personal/abraaovitor_bemol_com_br/IQD6s9faVQBpSoClXpMgS5wUAQqHCV4LWW73KjbtgL1k50E?e=FO0oNQ&download=1';
+
+    try {
+        const resp = await fetch(ONEDRIVE_URL, { credentials: 'include' });
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const data = await resp.json();
+
+        // O Power Automate salva o array direto ou dentro de 'value'
+        const items = Array.isArray(data) ? data : (data.value || []);
+
+        if (items.length === 0) throw new Error('Nenhum item retornado');
+
+        dadosGlobais = items.map(item => {
+            // Itinerario = "106 - Amazonas Shopping", precisamos separar número e destino
+            const itin  = (item.Itinerario || item.Title || '');
+            const partes = itin.split(' - ');
+            const num   = partes[0]?.trim() || '';
+            const dest  = partes.slice(1).join(' - ').trim();
+
+            return {
+                Title:          item.Title,
+                Itinerario:     num,
+                Destino:        dest || item.Title,
+                Transportadora: item.Transportadora,
+                Dt:             item.Dt,
+                Placa:          item.Placa,
+                Motorista:      item.Motorista,
+                Conferente:     item.Conferente,
+                Lacre_traseiro: item.Lacre,          // campo real = "Lacre"
+                Paletes:        item.Paletes,
+                Doca:           item.Doca,
+                SaidaCD:        item.SaidaCD0,        // campo real = "SaidaCD0"
+                ChegadaLoja:    item.ChegadaLoja,
+                SaidaLoja:      item.SaidaLoja,
+                ChegadaCD:      item.ChegadaCD,
+                email_da_loja:  item.emaildaloja,     // campo real = "emaildaloja"
+                tempo_de_viagem:item.tempo_de_viagem,
+            };
+        });
+
+        renderRows();
+        segundosUpdate = 0;
+        console.log(`✅ ${dadosGlobais.length} rotas carregadas do OneDrive`);
+
+    } catch(e) {
+        console.warn('OneDrive indisponível, usando mock:', e.message);
+    }
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+let intervaloId = null;
+function iniciarAtualizacao() {
+    if (intervaloId) clearInterval(intervaloId);
+    carregarSharePoint();
+    intervaloId = setInterval(() => { carregarSharePoint(); renderRows(); }, CONFIG.intervaloSecs * 1000);
+}
+
+renderRows();
+atualizarRelogio();
+setInterval(atualizarRelogio, 1000);
+setInterval(atualizarSync, 1000);
+setInterval(() => renderRows(), 30000);
+iniciarAtualizacao();
+</script>
+
+</body>
+</html>
